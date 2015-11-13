@@ -42,7 +42,9 @@ public class VirtualFreePageManager implements IVirtualFreePageManager {
     public int getFreePage(ITreeIndexMetaDataFrame metaFrame) throws HyracksDataException {
         // The very first call returns page id 2 because the BTree uses
         // the first page as metadata page, and the second page as root page.
-        return currentPageId.incrementAndGet();
+        int aInt = currentPageId.incrementAndGet();
+        System.out.println(this + ": new free page " + aInt);
+        return aInt;
     }
 
     @Override
@@ -53,6 +55,7 @@ public class VirtualFreePageManager implements IVirtualFreePageManager {
     @Override
     public void init(ITreeIndexMetaDataFrame metaFrame, int currentMaxPage) throws HyracksDataException {
         currentPageId.set(1);
+        System.out.println(this + ": Resetting free page manager");
     }
 
     @Override

@@ -78,11 +78,10 @@ public abstract class AbstractLSMIndex implements ILSMIndexInternal {
     protected final AtomicBoolean[] flushRequests;
 
     public AbstractLSMIndex(List<IVirtualBufferCache> virtualBufferCaches, IBufferCache diskBufferCache,
-            ILSMIndexFileManager fileManager, IFileMapProvider diskFileMapProvider,
-            double bloomFilterFalsePositiveRate, ILSMMergePolicy mergePolicy, ILSMOperationTracker opTracker,
-            ILSMIOOperationScheduler ioScheduler, ILSMIOOperationCallback ioOpCallback,
-            ILSMComponentFilterFrameFactory filterFrameFactory, LSMComponentFilterManager filterManager,
-            int[] filterFields, boolean durable) {
+            ILSMIndexFileManager fileManager, IFileMapProvider diskFileMapProvider, double bloomFilterFalsePositiveRate,
+            ILSMMergePolicy mergePolicy, ILSMOperationTracker opTracker, ILSMIOOperationScheduler ioScheduler,
+            ILSMIOOperationCallback ioOpCallback, ILSMComponentFilterFrameFactory filterFrameFactory,
+            LSMComponentFilterManager filterManager, int[] filterFields, boolean durable) {
         this.virtualBufferCaches = virtualBufferCaches;
         this.diskBufferCache = diskBufferCache;
         this.diskFileMapProvider = diskFileMapProvider;
@@ -216,8 +215,12 @@ public abstract class AbstractLSMIndex implements ILSMIndexInternal {
 
     @Override
     public void changeMutableComponent() {
+        System.out.println(
+                this + ": changeMutableComponent started: current component id =" + currentMutableComponentId.get());
         currentMutableComponentId.set((currentMutableComponentId.get() + 1) % memoryComponents.size());
         ((AbstractMemoryLSMComponent) memoryComponents.get(currentMutableComponentId.get())).setActive();
+        System.out.println(this + ": changeMutableComponent completed. current mutable component id = "
+                + currentMutableComponentId.get());
     }
 
     @Override

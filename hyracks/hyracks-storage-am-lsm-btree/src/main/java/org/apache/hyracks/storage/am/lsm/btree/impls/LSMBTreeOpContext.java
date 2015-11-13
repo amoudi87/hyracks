@@ -22,6 +22,7 @@ package org.apache.hyracks.storage.am.lsm.btree.impls;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.hyracks.api.dataflow.value.IBinaryComparator;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.storage.am.btree.api.IBTreeLeafFrame;
 import org.apache.hyracks.storage.am.btree.impls.BTree;
@@ -63,7 +64,8 @@ public final class LSMBTreeOpContext implements ILSMIndexOperationContext {
 
     public LSMBTreeOpContext(List<ILSMComponent> mutableComponents, ITreeIndexFrameFactory insertLeafFrameFactory,
             ITreeIndexFrameFactory deleteLeafFrameFactory, IModificationOperationCallback modificationCallback,
-            ISearchOperationCallback searchCallback, int numBloomFilterKeyFields, int[] btreeFields, int[] filterFields) {
+            ISearchOperationCallback searchCallback, int numBloomFilterKeyFields, int[] btreeFields,
+            int[] filterFields) {
         LSMBTreeMemoryComponent c = (LSMBTreeMemoryComponent) mutableComponents.get(0);
         IBinaryComparatorFactory cmpFactories[] = c.getBTree().getComparatorFactories();
         if (cmpFactories[0] != null) {
@@ -110,6 +112,17 @@ public final class LSMBTreeOpContext implements ILSMIndexOperationContext {
             filterCmp = null;
             filterTuple = null;
         }
+    }
+
+    public void printForDebugging() {
+        IBinaryComparator[] cmps = cmp.getComparators();
+        String output = "opContext has: cmp:" + java.lang.System.identityHashCode(cmp);
+        int i = 0;
+        for (IBinaryComparator bCmp : cmps) {
+            output += "\nbin cmp " + i + " :" + java.lang.System.identityHashCode(bCmp);
+            i++;
+        }
+        System.err.println(output);
     }
 
     @Override

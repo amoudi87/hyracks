@@ -20,50 +20,61 @@
 package org.apache.hyracks.storage.am.common.tuples;
 
 import org.apache.hyracks.api.comm.IFrameTupleAccessor;
+import org.apache.hyracks.dataflow.common.comm.io.FrameTupleAccessor;
 import org.apache.hyracks.dataflow.common.data.accessors.IFrameTupleReference;
 
 public class PermutingFrameTupleReference implements IFrameTupleReference {
-	private IFrameTupleAccessor fta;
-	private int tIndex;
-	private int[] fieldPermutation;
+    private IFrameTupleAccessor fta;
+    private int tIndex;
+    private int[] fieldPermutation;
 
-	public void setFieldPermutation(int[] fieldPermutation) {
-		this.fieldPermutation = fieldPermutation;
-	}
+    public void setFieldPermutation(int[] fieldPermutation) {
+        this.fieldPermutation = fieldPermutation;
+    }
 
-	public void reset(IFrameTupleAccessor fta, int tIndex) {
-		this.fta = fta;
-		this.tIndex = tIndex;
-	}
+    public void reset(IFrameTupleAccessor fta, int tIndex) {
+        this.fta = fta;
+        this.tIndex = tIndex;
+    }
 
-	@Override
-	public IFrameTupleAccessor getFrameTupleAccessor() {
-		return fta;
-	}
+    @Override
+    public IFrameTupleAccessor getFrameTupleAccessor() {
+        return fta;
+    }
 
-	@Override
-	public int getTupleIndex() {
-		return tIndex;
-	}
+    @Override
+    public int getTupleIndex() {
+        return tIndex;
+    }
 
-	@Override
-	public int getFieldCount() {
-		return fieldPermutation.length;
-	}
+    @Override
+    public int getFieldCount() {
+        return fieldPermutation.length;
+    }
 
-	@Override
-	public byte[] getFieldData(int fIdx) {
-		return fta.getBuffer().array();
-	}
+    @Override
+    public byte[] getFieldData(int fIdx) {
+        return fta.getBuffer().array();
+    }
 
-	@Override
-	public int getFieldStart(int fIdx) {
-		return fta.getTupleStartOffset(tIndex) + fta.getFieldSlotsLength()
-				+ fta.getFieldStartOffset(tIndex, fieldPermutation[fIdx]);
-	}
+    @Override
+    public int getFieldStart(int fIdx) {
+        return fta.getTupleStartOffset(tIndex) + fta.getFieldSlotsLength()
+                + fta.getFieldStartOffset(tIndex, fieldPermutation[fIdx]);
+    }
 
-	@Override
-	public int getFieldLength(int fIdx) {
-		return fta.getFieldLength(tIndex, fieldPermutation[fIdx]);
-	}
+    @Override
+    public int getFieldLength(int fIdx) {
+        return fta.getFieldLength(tIndex, fieldPermutation[fIdx]);
+    }
+
+    // For debugging purposes
+    public String toString() {
+        if (this.fta instanceof FrameTupleAccessor) {
+            FrameTupleAccessor fta = (FrameTupleAccessor) this.fta;
+            return fta.toString(new int[] { fieldPermutation[fieldPermutation.length - 1] }, tIndex);
+        } else {
+            return "toString() not yet implemented";
+        }
+    }
 }

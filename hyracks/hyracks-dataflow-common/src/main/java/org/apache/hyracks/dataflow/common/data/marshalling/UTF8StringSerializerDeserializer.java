@@ -21,6 +21,7 @@ package org.apache.hyracks.dataflow.common.data.marshalling;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -30,15 +31,22 @@ import org.apache.hyracks.util.string.UTF8StringWriter;
 public class UTF8StringSerializerDeserializer implements ISerializerDeserializer<String> {
 
     private static final long serialVersionUID = 1L;
-    private UTF8StringReader reader = new UTF8StringReader();
-    private UTF8StringWriter writer = new UTF8StringWriter();
+    private ConcurrentLinkedQueue<UTF8StringReader> readers = new ConcurrentLinkedQueue<UTF8StringReader>();
+    private ConcurrentLinkedQueue<UTF8StringWriter> writers = new ConcurrentLinkedQueue<UTF8StringWriter>();
 
-    public UTF8StringSerializerDeserializer() {}
+    public UTF8StringSerializerDeserializer() {
+    }
 
     @Override
     public String deserialize(DataInput in) throws HyracksDataException {
         try {
-            return reader.readUTF(in);
+            UTF8StringReader reader = readers.poll();
+            if (reader == null) {
+                reader = new UTF8StringReader();
+            }
+            String aString = reader.readUTF(in);
+            readers.offer(reader);
+            return aString;
         } catch (IOException e) {
             throw new HyracksDataException(e);
         }
@@ -47,7 +55,12 @@ public class UTF8StringSerializerDeserializer implements ISerializerDeserializer
     @Override
     public void serialize(String instance, DataOutput out) throws HyracksDataException {
         try {
+            UTF8StringWriter writer = writers.poll();
+            if(writer == null){
+                writer = new UTF8StringWriter();
+            }
             writer.writeUTF8(instance, out);
+            writers.offer(writer);
         } catch (IOException e) {
             throw new HyracksDataException(e);
         }

@@ -20,6 +20,7 @@ package org.apache.hyracks.dataflow.common.comm.io;
 
 import java.io.DataInputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.apache.hyracks.api.comm.FrameConstants;
 import org.apache.hyracks.api.comm.FrameHelper;
@@ -72,9 +73,8 @@ public class FrameTupleAccessor implements IFrameTupleAccessor {
 
     @Override
     public int getTupleStartOffset(int tupleIndex) {
-        int offset = tupleIndex == 0 ?
-                FrameConstants.TUPLE_START_OFFSET :
-                IntSerDeUtils.getInt(buffer.array(), tupleCountOffset - 4 * tupleIndex);
+        int offset = tupleIndex == 0 ? FrameConstants.TUPLE_START_OFFSET
+                : IntSerDeUtils.getInt(buffer.array(), tupleCountOffset - 4 * tupleIndex);
         return start + offset;
     }
 
@@ -85,16 +85,15 @@ public class FrameTupleAccessor implements IFrameTupleAccessor {
 
     @Override
     public int getTupleEndOffset(int tupleIndex) {
-        return start + IntSerDeUtils
-                .getInt(buffer.array(), tupleCountOffset - FrameConstants.SIZE_LEN * (tupleIndex + 1));
+        return start
+                + IntSerDeUtils.getInt(buffer.array(), tupleCountOffset - FrameConstants.SIZE_LEN * (tupleIndex + 1));
     }
 
     @Override
     public int getFieldStartOffset(int tupleIndex, int fIdx) {
-        return fIdx == 0 ?
-                0 :
-                IntSerDeUtils
-                        .getInt(buffer.array(), getTupleStartOffset(tupleIndex) + (fIdx - 1) * FrameConstants.SIZE_LEN);
+        return fIdx == 0 ? 0
+                : IntSerDeUtils.getInt(buffer.array(),
+                        getTupleStartOffset(tupleIndex) + (fIdx - 1) * FrameConstants.SIZE_LEN);
     }
 
     @Override
@@ -129,6 +128,26 @@ public class FrameTupleAccessor implements IFrameTupleAccessor {
         System.err.println(sb.toString());
     }
 
+    public void prettyPrint(String prefix, int[] recordFields) {
+        ByteBufferInputStream bbis = new ByteBufferInputStream();
+        DataInputStream dis = new DataInputStream(bbis);
+        int tc = getTupleCount();
+        StringBuilder sb = new StringBuilder();
+        sb.append(prefix).append("TC: " + tc).append("\n");
+        for (int i = 0; i < tc; ++i) {
+            prettyPrint(i, bbis, dis, sb, recordFields);
+        }
+        System.err.println(sb.toString());
+    }
+
+    public String toString(int[] recordFields, int tupleIndex) {
+        ByteBufferInputStream bbis = new ByteBufferInputStream();
+        DataInputStream dis = new DataInputStream(bbis);
+        StringBuilder sb = new StringBuilder();
+        prettyPrint(tupleIndex, bbis, dis, sb, recordFields);
+        return sb.toString();
+    }
+
     public void prettyPrint() {
         prettyPrint("");
     }
@@ -141,6 +160,28 @@ public class FrameTupleAccessor implements IFrameTupleAccessor {
             bbis.setByteBuffer(buffer, getTupleStartOffset(tid) + getFieldSlotsLength() + getFieldStartOffset(tid, j));
             try {
                 sb.append(recordDescriptor.getFields()[j].deserialize(dis));
+            } catch (HyracksDataException e) {
+                e.printStackTrace();
+            }
+            sb.append("}");
+        }
+        sb.append("\n");
+    }
+
+    protected void prettyPrint(int tid, ByteBufferInputStream bbis, DataInputStream dis, StringBuilder sb,
+            int[] recordFields) {
+        Arrays.sort(recordFields);
+        sb.append(" tid" + tid + ":(" + getTupleStartOffset(tid) + ", " + getTupleEndOffset(tid) + ")[");
+        for (int j = 0; j < getFieldCount(); ++j) {
+            sb.append("f" + j + ":(" + getFieldStartOffset(tid, j) + ", " + getFieldEndOffset(tid, j) + ") ");
+            sb.append("{");
+            bbis.setByteBuffer(buffer, getTupleStartOffset(tid) + getFieldSlotsLength() + getFieldStartOffset(tid, j));
+            try {
+                if (Arrays.binarySearch(recordFields, j) >= 0) {
+                    sb.append("a record field: only print using pointable");
+                } else {
+                    sb.append(recordDescriptor.getFields()[j].deserialize(dis));
+                }
             } catch (HyracksDataException e) {
                 e.printStackTrace();
             }

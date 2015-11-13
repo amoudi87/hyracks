@@ -57,8 +57,9 @@ public abstract class IndexDataflowHelper implements IIndexDataflowHelper {
         this.resourceIdFactory = opDesc.getStorageManager().getResourceIdFactory(ctx);
         this.partition = partition;
         this.ioDeviceId = opDesc.getFileSplitProvider().getFileSplits()[partition].getIODeviceId();
-        this.file = new FileReference(new File(IndexFileNameUtil.prepareFileName(opDesc.getFileSplitProvider()
-                .getFileSplits()[partition].getLocalFile().getFile().getPath(), ioDeviceId)));
+        this.file = new FileReference(new File(IndexFileNameUtil.prepareFileName(
+                opDesc.getFileSplitProvider().getFileSplits()[partition].getLocalFile().getFile().getPath(),
+                ioDeviceId)));
         this.durable = durable;
         this.resourceName = file.getFile().getPath();
     }
@@ -92,8 +93,8 @@ public abstract class IndexDataflowHelper implements IIndexDataflowHelper {
                 resourceID = resourceIdFactory.createId();
                 ILocalResourceFactory localResourceFactory = opDesc.getLocalResourceFactoryProvider()
                         .getLocalResourceFactory();
-                localResourceRepository.insert(localResourceFactory.createLocalResource(resourceID, resourceName,
-                        partition));
+                localResourceRepository
+                        .insert(localResourceFactory.createLocalResource(resourceID, resourceName, partition));
             } catch (IOException e) {
                 throw new HyracksDataException(e);
             }
@@ -115,6 +116,7 @@ public abstract class IndexDataflowHelper implements IIndexDataflowHelper {
             }
             lcManager.open(resourceName);
         }
+        System.out.println("opening the index with the file " + this.file.getFile().getAbsolutePath());
     }
 
     @Override

@@ -22,6 +22,8 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import org.apache.hyracks.util.encoding.VarLenIntEncoderDecoder;
 
@@ -353,6 +355,10 @@ public class UTF8StringUtil {
 
     private static int compareTo(byte[] thisBytes, int thisStart, byte[] thatBytes, int thatStart,
             boolean useLowerCase, boolean useRawByte) {
+        byte[] firstStringBytes = Arrays.copyOfRange(thisBytes, thisStart, thisBytes.length);
+        byte[] secondStringBytes = Arrays.copyOfRange(thatBytes, thatStart, thatBytes.length);
+        String first = new String(firstStringBytes,StandardCharsets.UTF_8);
+        String second = new String(secondStringBytes,StandardCharsets.UTF_8);
         int utflen1 = getUTFLength(thisBytes, thisStart);
         int utflen2 = getUTFLength(thatBytes, thatStart);
 

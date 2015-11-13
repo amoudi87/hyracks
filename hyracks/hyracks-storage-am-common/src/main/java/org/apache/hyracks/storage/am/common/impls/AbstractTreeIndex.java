@@ -117,6 +117,10 @@ public abstract class AbstractTreeIndex implements ITreeIndex {
         } finally {
             rootNode.releaseWriteLatch(true);
             bufferCache.unpin(rootNode);
+            String rootFrame = frame.toString();
+            if (rootFrame.contains(" 2")) {
+                System.out.println("Cought the root");
+            }
         }
     }
 
@@ -383,7 +387,7 @@ public abstract class AbstractTreeIndex implements ITreeIndex {
     public IBinaryComparatorFactory[] getCmpFactories() {
         return cmpFactories;
     }
-    
+
     @Override
     public boolean hasMemoryComponents() {
         return true;

@@ -174,8 +174,7 @@ public class VirtualBufferCache implements IVirtualBufferCache {
             }
 
             if (!newPage) {
-                throw new HyracksDataException("Page " + BufferedFileHandle.getPageId(dpid)
-                        + " does not exist in file "
+                throw new HyracksDataException("Page " + BufferedFileHandle.getPageId(dpid) + " does not exist in file "
                         + fileMapManager.lookupFileName(BufferedFileHandle.getFileId(dpid)));
             }
 
@@ -308,6 +307,12 @@ public class VirtualBufferCache implements IVirtualBufferCache {
         final ReadWriteLock latch;
         volatile long dpid;
         VirtualPage next;
+
+        public String toString() {
+            String pretty = "VirtualPage: id = " + dpid + " Next Page id = " + ((next == null) ? (-1) : next.dpid)
+                    + " .";
+            return pretty;
+        }
 
         public VirtualPage(ByteBuffer buffer) {
             this.buffer = buffer;

@@ -153,12 +153,16 @@ public class BTreeNSMLeafFrame extends TreeIndexNSMFrame implements IBTreeLeafFr
 
     @Override
     public void insert(ITupleReference tuple, int tupleIndex) {
+        int nl = getNextLeaf();
         int freeSpace = buf.getInt(freeSpaceOff);
         slotManager.insertSlot(tupleIndex, freeSpace);
         int bytesWritten = tupleWriter.writeTuple(tuple, buf.array(), freeSpace);
         buf.putInt(tupleCountOff, buf.getInt(tupleCountOff) + 1);
         buf.putInt(freeSpaceOff, buf.getInt(freeSpaceOff) + bytesWritten);
         buf.putInt(totalFreeSpaceOff, buf.getInt(totalFreeSpaceOff) - bytesWritten - slotManager.getSlotSize());
+        if (nl != getNextLeaf()) {
+            System.out.println("an insert corrupted the leaf page");
+        }
     }
 
     @Override
@@ -206,8 +210,8 @@ public class BTreeNSMLeafFrame extends TreeIndexNSMFrame implements IBTreeLeafFr
 
             // On the right page we need to copy rightmost slots to the left.
             int src = rightFrame.getSlotManager().getSlotEndOff();
-            int dest = rightFrame.getSlotManager().getSlotEndOff() + tuplesToLeft
-                    * rightFrame.getSlotManager().getSlotSize();
+            int dest = rightFrame.getSlotManager().getSlotEndOff()
+                    + tuplesToLeft * rightFrame.getSlotManager().getSlotSize();
             int length = rightFrame.getSlotManager().getSlotSize() * tuplesToRight;
             System.arraycopy(right.array(), src, right.array(), dest, length);
             right.putInt(tupleCountOff, tuplesToRight);
@@ -242,8 +246,12 @@ public class BTreeNSMLeafFrame extends TreeIndexNSMFrame implements IBTreeLeafFr
 
     @Override
     protected void resetSpaceParams() {
+        int nl = getNextLeaf();
         buf.putInt(freeSpaceOff, nextLeafOff + 4);
         buf.putInt(totalFreeSpaceOff, buf.capacity() - (nextLeafOff + 4));
+        if (getNextLeaf() != nl) {
+            System.err.println("error here");
+        }
     }
 
     @Override
@@ -298,5 +306,9 @@ public class BTreeNSMLeafFrame extends TreeIndexNSMFrame implements IBTreeLeafFr
                 assert cmp.compare(previousFt, frameTuple) < 0;
             }
         }
+    }
+
+    public String toString() {
+        return "I am a leaf frame. My next leaf is " + getNextLeaf();
     }
 }

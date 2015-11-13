@@ -27,6 +27,7 @@ import org.apache.hyracks.data.std.api.IComparable;
 import org.apache.hyracks.data.std.api.IHashable;
 import org.apache.hyracks.data.std.api.IPointable;
 import org.apache.hyracks.data.std.api.IPointableFactory;
+import org.apache.hyracks.data.std.api.IValueReference;
 import org.apache.hyracks.data.std.util.GrowableArray;
 import org.apache.hyracks.data.std.util.UTF8StringBuilder;
 import org.apache.hyracks.util.string.UTF8StringUtil;
@@ -40,6 +41,9 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
     private int metaLength;
     private int hashValue;
     private int stringLength;
+    private String prevString = null;
+    private long prevThread = 0L;
+    private int objectId = java.lang.System.identityHashCode(this);
 
     /**
      * reset those meta length.
@@ -52,6 +56,32 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
         metaLength = UTF8StringUtil.getNumBytesToStoreLength(getUTF8Length());
         hashValue = 0;
         stringLength = -1;
+        /*String newString = toString();
+        if (newString.contains("wisc.edu#")) {
+            String output = "My Id = " + objectId;
+            if (prevString != null) {
+                if (newString.equals(prevString)) {
+                    output += " NORMAL: UTF8StringPointble: prev = current = " + newString;
+                } else {
+                    output += " WARNIN: UTF8StringPointble: prev = " + prevString + " NOT equal current = " + newString;
+                }
+            }
+            System.err.println(output);
+        }
+        prevString = newString;*/
+    }
+
+    @Override
+    public void set(byte[] bytes, int start, int length) {
+        this.bytes = bytes;
+        this.start = start;
+        this.length = length;
+        afterReset();
+    }
+
+    @Override
+    public void set(IValueReference pointer) {
+        set(pointer.getByteArray(), pointer.getStartOffset(), pointer.getLength());
     }
 
     public static final ITypeTraits TYPE_TRAITS = new ITypeTraits() {
@@ -94,7 +124,8 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
      * Returns the character at the given byte offset. The caller is responsible for making sure that
      * the provided offset is within bounds and points to the beginning of a valid UTF8 character.
      *
-     * @param offset - Byte offset
+     * @param offset
+     *            - Byte offset
      * @return Character at the given offset.
      */
     public char charAt(int offset) {
@@ -166,8 +197,8 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
      */
 
     public int ignoreCaseCompareTo(UTF8StringPointable other) {
-        return UTF8StringUtil.lowerCaseCompareTo(this.getByteArray(), this.getStartOffset(),
-                other.getByteArray(), other.getStartOffset());
+        return UTF8StringUtil.lowerCaseCompareTo(this.getByteArray(), this.getStartOffset(), other.getByteArray(),
+                other.getStartOffset());
     }
 
     public int find(UTF8StringPointable pattern, boolean ignoreCase) {
@@ -351,10 +382,7 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
      * @param out
      * @throws IOException
      */
-    public static void substrBefore(
-            UTF8StringPointable src,
-            UTF8StringPointable match,
-            UTF8StringBuilder builder,
+    public static void substrBefore(UTF8StringPointable src, UTF8StringPointable match, UTF8StringBuilder builder,
             GrowableArray out) throws IOException {
 
         int byteOffset = find(src, match, false);
@@ -367,7 +395,7 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
         final int srcMetaLen = src.getMetaDataLength();
 
         builder.reset(out, byteOffset);
-        for (int idx = 0; idx < byteOffset; ) {
+        for (int idx = 0; idx < byteOffset;) {
             builder.appendChar(src.charAt(srcMetaLen + idx));
             idx += src.charSize(srcMetaLen + idx);
         }
@@ -387,10 +415,7 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
      * @param builder
      * @param out
      */
-    public static void substrAfter(
-            UTF8StringPointable src,
-            UTF8StringPointable match,
-            UTF8StringBuilder builder,
+    public static void substrAfter(UTF8StringPointable src, UTF8StringPointable match, UTF8StringBuilder builder,
             GrowableArray out) throws IOException {
 
         int byteOffset = find(src, match, false);
