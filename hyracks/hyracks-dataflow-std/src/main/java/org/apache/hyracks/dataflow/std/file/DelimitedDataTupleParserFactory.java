@@ -96,4 +96,8 @@ public class DelimitedDataTupleParserFactory implements ITupleParserFactory {
         };
     }
 
+    @Override
+    public void setDataverse(String dataverse) {
+    }
+
 }

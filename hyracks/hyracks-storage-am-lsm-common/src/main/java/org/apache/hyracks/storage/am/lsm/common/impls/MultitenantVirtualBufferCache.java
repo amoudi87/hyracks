@@ -32,6 +32,7 @@ public class MultitenantVirtualBufferCache implements IVirtualBufferCache {
 
     public MultitenantVirtualBufferCache(IVirtualBufferCache virtualBufferCache) {
         this.vbc = virtualBufferCache;
+        ((VirtualBufferCache) vbc).setmtvbc(this);
         openCount = 0;
     }
 
@@ -98,7 +99,6 @@ public class MultitenantVirtualBufferCache implements IVirtualBufferCache {
         }
     }
 
-
     @Override
     public synchronized void open() throws HyracksDataException {
         ++openCount;
@@ -160,5 +160,15 @@ public class MultitenantVirtualBufferCache implements IVirtualBufferCache {
     @Override
     public IIOReplicationManager getIOReplicationManager() {
         return null;
+    }
+
+    @Override
+    public int lookupFileId(FileReference fileRef) throws HyracksDataException {
+        return vbc.lookupFileId(fileRef);
+    }
+
+    @Override
+    public FileReference lookupFileName(int fileId) throws HyracksDataException {
+        return vbc.lookupFileName(fileId);
     }
 }

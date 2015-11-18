@@ -378,10 +378,6 @@ public class LSMBTree extends AbstractLSMIndex implements ITreeIndex {
     }
 
     private boolean insert(ITupleReference tuple, LSMBTreeOpContext ctx) throws HyracksDataException, IndexException {
-        String tupleBefore = tuple.toString();
-        if (tupleBefore.contains("edu#3947304.0#1438708943") || tupleBefore.contains("sc.edu#3947203.0#1438708928")) {
-            System.err.println("here we go");
-        }
         ILSMComponent c = ctx.getComponentHolder().get(0);
         LSMBTreeMemoryComponent mutableComponent = (LSMBTreeMemoryComponent) c;
         MultiComparator comparator = MultiComparator.create(mutableComponent.getBTree().getComparatorFactories());
@@ -448,7 +444,6 @@ public class LSMBTree extends AbstractLSMIndex implements ITreeIndex {
     @Override
     public void scheduleFlush(ILSMIndexOperationContext ctx, ILSMIOOperationCallback callback)
             throws HyracksDataException {
-        System.out.println(this + ": scheduleFlush started");
         ILSMComponent flushingComponent = ctx.getComponentHolder().get(0);
         LSMComponentFileReferences componentFileRefs = fileManager.getRelFlushFileReference();
         LSMBTreeOpContext opCtx = createOpContext(NoOpOperationCallback.INSTANCE, NoOpOperationCallback.INSTANCE);
@@ -459,17 +454,14 @@ public class LSMBTree extends AbstractLSMIndex implements ITreeIndex {
         ioScheduler.scheduleOperation(new LSMBTreeFlushOperation(flushAccessor, flushingComponent,
                 componentFileRefs.getInsertIndexFileReference(), componentFileRefs.getBloomFilterFileReference(),
                 callback, fileManager.getBaseDir()));
-        System.out.println(this + ": scheduleFlush completed");
     }
 
     @Override
     public ILSMComponent flush(ILSMIOOperation operation) throws HyracksDataException, IndexException {
-        System.out.println(this + ": flush starting");
         LSMBTreeFlushOperation flushOp = (LSMBTreeFlushOperation) operation;
         LSMBTreeMemoryComponent flushingComponent = (LSMBTreeMemoryComponent) flushOp.getFlushingComponent();
         IIndexAccessor accessor = flushingComponent.getBTree().createAccessor(NoOpOperationCallback.INSTANCE,
                 NoOpOperationCallback.INSTANCE);
-
         RangePredicate nullPred = new RangePredicate(null, null, true, true, null, null);
         IIndexCursor countingCursor = ((BTreeAccessor) accessor).createCountingSearchCursor();
         accessor.search(countingCursor, nullPred);
@@ -515,7 +507,6 @@ public class LSMBTree extends AbstractLSMIndex implements ITreeIndex {
             filterManager.updateFilterInfo(component.getLSMComponentFilter(), filterTuples);
             filterManager.writeFilterInfo(component.getLSMComponentFilter(), component.getBTree());
         }
-        System.out.println(this + ": flush completed");
         return component;
 
     }

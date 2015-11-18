@@ -23,50 +23,54 @@ import org.apache.hyracks.storage.am.common.api.ISlotManager;
 import org.apache.hyracks.storage.am.common.api.ITreeIndexFrame;
 
 public abstract class AbstractSlotManager implements ISlotManager {
-	
-	protected final int GREATEST_KEY_INDICATOR = -1;
+
+    protected final int GREATEST_KEY_INDICATOR = -1;
     protected final int ERROR_INDICATOR = -2;
-	
-	protected static final int slotSize = 4;
-	protected ITreeIndexFrame frame;
 
-	@Override
-	public int getTupleOff(int offset) {
-		return frame.getBuffer().getInt(offset);
-	}
+    protected static final int slotSize = 4;
+    protected ITreeIndexFrame frame;
 
-	@Override
-	public void setSlot(int offset, int value) {
-		frame.getBuffer().putInt(offset, value);
-	}
+    @Override
+    public int getTupleOff(int offset) {
+        try {
+            return frame.getBuffer().getInt(offset);
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
-	@Override
-	public int getSlotEndOff() {
-		return frame.getBuffer().capacity()
-				- (frame.getTupleCount() * slotSize);
-	}
+    @Override
+    public void setSlot(int offset, int value) {
+        frame.getBuffer().putInt(offset, value);
+    }
 
-	@Override
-	public int getSlotStartOff() {
-		return frame.getBuffer().capacity() - slotSize;
-	}
+    @Override
+    public int getSlotEndOff() {
+        return frame.getBuffer().capacity() - (frame.getTupleCount() * slotSize);
+    }
 
-	@Override
-	public int getSlotSize() {
-		return slotSize;
-	}
+    @Override
+    public int getSlotStartOff() {
+        return frame.getBuffer().capacity() - slotSize;
+    }
 
-	@Override
-	public void setFrame(ITreeIndexFrame frame) {
-		this.frame = frame;
-	}
+    @Override
+    public int getSlotSize() {
+        return slotSize;
+    }
 
-	@Override
-	public int getSlotOff(int tupleIndex) {
-		return getSlotStartOff() - tupleIndex * slotSize;
-	}
-	
-	@Override
+    @Override
+    public void setFrame(ITreeIndexFrame frame) {
+        this.frame = frame;
+    }
+
+    @Override
+    public int getSlotOff(int tupleIndex) {
+        return getSlotStartOff() - tupleIndex * slotSize;
+    }
+
+    @Override
     public int getGreatestKeyIndicator() {
         return GREATEST_KEY_INDICATOR;
     }

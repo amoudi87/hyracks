@@ -153,16 +153,12 @@ public class BTreeNSMLeafFrame extends TreeIndexNSMFrame implements IBTreeLeafFr
 
     @Override
     public void insert(ITupleReference tuple, int tupleIndex) {
-        int nl = getNextLeaf();
         int freeSpace = buf.getInt(freeSpaceOff);
         slotManager.insertSlot(tupleIndex, freeSpace);
         int bytesWritten = tupleWriter.writeTuple(tuple, buf.array(), freeSpace);
         buf.putInt(tupleCountOff, buf.getInt(tupleCountOff) + 1);
         buf.putInt(freeSpaceOff, buf.getInt(freeSpaceOff) + bytesWritten);
         buf.putInt(totalFreeSpaceOff, buf.getInt(totalFreeSpaceOff) - bytesWritten - slotManager.getSlotSize());
-        if (nl != getNextLeaf()) {
-            System.out.println("an insert corrupted the leaf page");
-        }
     }
 
     @Override
@@ -246,12 +242,8 @@ public class BTreeNSMLeafFrame extends TreeIndexNSMFrame implements IBTreeLeafFr
 
     @Override
     protected void resetSpaceParams() {
-        int nl = getNextLeaf();
         buf.putInt(freeSpaceOff, nextLeafOff + 4);
         buf.putInt(totalFreeSpaceOff, buf.capacity() - (nextLeafOff + 4));
-        if (getNextLeaf() != nl) {
-            System.err.println("error here");
-        }
     }
 
     @Override

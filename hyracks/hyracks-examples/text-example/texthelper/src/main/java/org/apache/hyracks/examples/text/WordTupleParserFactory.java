@@ -176,4 +176,10 @@ public class WordTupleParserFactory implements ITupleParserFactory {
             return true;
         }
     }
+
+    @Override
+    public void setDataverse(String dataverse) {
+        // TODO Auto-generated method stub
+        
+    }
 }

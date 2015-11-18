@@ -197,7 +197,7 @@ public class DebugBufferCache implements IBufferCache {
     public int getFileReferenceCount(int fileId) {
         return bufferCache.getFileReferenceCount(fileId);
     }
-    
+
     @Override
     public boolean isReplicationEnabled() {
         return false;
@@ -206,5 +206,15 @@ public class DebugBufferCache implements IBufferCache {
     @Override
     public IIOReplicationManager getIOReplicationManager() {
         return null;
+    }
+
+    @Override
+    public int lookupFileId(FileReference fileRef) throws HyracksDataException {
+        throw new HyracksDataException("unimplemented method");
+    }
+
+    @Override
+    public FileReference lookupFileName(int fileId) throws HyracksDataException {
+        throw new HyracksDataException("unimplemented method");
     }
 }

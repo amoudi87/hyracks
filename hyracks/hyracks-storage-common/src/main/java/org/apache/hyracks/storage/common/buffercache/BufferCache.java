@@ -835,4 +835,14 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
     public IIOReplicationManager getIOReplicationManager() {
         return ioReplicationManager;
     }
+
+    @Override
+    public int lookupFileId(FileReference fileRef) throws HyracksDataException {
+        throw new HyracksDataException("unimplemented method");
+    }
+
+    @Override
+    public FileReference lookupFileName(int fileId) throws HyracksDataException {
+        throw new HyracksDataException("unimplemented method");
+    }
 }

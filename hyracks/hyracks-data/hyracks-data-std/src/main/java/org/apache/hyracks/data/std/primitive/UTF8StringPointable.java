@@ -41,9 +41,6 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
     private int metaLength;
     private int hashValue;
     private int stringLength;
-    private String prevString = null;
-    private long prevThread = 0L;
-    private int objectId = java.lang.System.identityHashCode(this);
 
     /**
      * reset those meta length.
@@ -56,19 +53,6 @@ public final class UTF8StringPointable extends AbstractPointable implements IHas
         metaLength = UTF8StringUtil.getNumBytesToStoreLength(getUTF8Length());
         hashValue = 0;
         stringLength = -1;
-        /*String newString = toString();
-        if (newString.contains("wisc.edu#")) {
-            String output = "My Id = " + objectId;
-            if (prevString != null) {
-                if (newString.equals(prevString)) {
-                    output += " NORMAL: UTF8StringPointble: prev = current = " + newString;
-                } else {
-                    output += " WARNIN: UTF8StringPointble: prev = " + prevString + " NOT equal current = " + newString;
-                }
-            }
-            System.err.println(output);
-        }
-        prevString = newString;*/
     }
 
     @Override

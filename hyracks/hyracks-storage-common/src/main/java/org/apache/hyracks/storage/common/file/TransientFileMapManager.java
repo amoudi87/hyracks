@@ -20,6 +20,7 @@ package org.apache.hyracks.storage.common.file;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.api.io.FileReference;
@@ -30,6 +31,15 @@ public class TransientFileMapManager implements IFileMapManager {
     private Map<Integer, FileReference> id2nameMap = new HashMap<Integer, FileReference>();
     private Map<FileReference, Integer> name2IdMap = new HashMap<FileReference, Integer>();
     private int idCounter = 0;
+    private Object vbc;
+
+    public Object getVbc() {
+        return vbc;
+    }
+
+    public void setVbc(Object vbc) {
+        this.vbc = vbc;
+    }
 
     @Override
     public FileReference lookupFileName(int fileId) throws HyracksDataException {
@@ -82,5 +92,20 @@ public class TransientFileMapManager implements IFileMapManager {
     @Override
     public void unregisterMemFile(int fileId) throws HyracksDataException {
         id2nameMap.remove(fileId);
+    }
+
+    public void prettyPrint() {
+        if (vbc != null) {
+            System.out.println("This VBC = " + vbc);
+        }
+        System.out.println(" ==============id2name==============");
+        for (Entry<Integer, FileReference> entry : id2nameMap.entrySet()) {
+            System.out.println("key=" + entry.getKey() + ":value=" + entry.getValue().getFile().getAbsolutePath());
+        }
+
+        System.out.println(" ==============name2id==============");
+        for (Entry<FileReference, Integer> entry : name2IdMap.entrySet()) {
+            System.out.println("key=" + entry.getKey().getFile().getAbsolutePath() + ":value=" + entry.getValue());
+        }
     }
 }

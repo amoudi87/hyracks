@@ -103,4 +103,12 @@ public class PartitionDataWriter implements IFrameWriter {
             pWriters[i].fail();
         }
     }
+
+    public void forwardAll() throws HyracksDataException {
+        for (int i = 0; i < pWriters.length; ++i) {
+            if (allocatedFrame) {
+                appenders[i].flush(pWriters[i], true);
+            }
+        }
+    }
 }

@@ -61,4 +61,8 @@ public interface IBufferCache {
 
     public IIOReplicationManager getIOReplicationManager();
 
+    public int lookupFileId(FileReference fileRef) throws HyracksDataException;
+
+    public FileReference lookupFileName(int fileId) throws HyracksDataException;
+
 }

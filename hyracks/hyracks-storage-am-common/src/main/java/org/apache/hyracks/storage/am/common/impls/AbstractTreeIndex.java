@@ -104,7 +104,7 @@ public abstract class AbstractTreeIndex implements ITreeIndex {
         bufferCache.closeFile(fileId);
     }
 
-    private void initEmptyTree() throws HyracksDataException {
+    public void initEmptyTree() throws HyracksDataException {
         ITreeIndexFrame frame = leafFrameFactory.createFrame();
         ITreeIndexMetaDataFrame metaFrame = freePageManager.getMetaDataFrameFactory().createFrame();
         freePageManager.init(metaFrame, rootPage);
@@ -117,10 +117,6 @@ public abstract class AbstractTreeIndex implements ITreeIndex {
         } finally {
             rootNode.releaseWriteLatch(true);
             bufferCache.unpin(rootNode);
-            String rootFrame = frame.toString();
-            if (rootFrame.contains(" 2")) {
-                System.out.println("Cought the root");
-            }
         }
     }
 

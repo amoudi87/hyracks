@@ -215,12 +215,8 @@ public abstract class AbstractLSMIndex implements ILSMIndexInternal {
 
     @Override
     public void changeMutableComponent() {
-        System.out.println(
-                this + ": changeMutableComponent started: current component id =" + currentMutableComponentId.get());
         currentMutableComponentId.set((currentMutableComponentId.get() + 1) % memoryComponents.size());
         ((AbstractMemoryLSMComponent) memoryComponents.get(currentMutableComponentId.get())).setActive();
-        System.out.println(this + ": changeMutableComponent completed. current mutable component id = "
-                + currentMutableComponentId.get());
     }
 
     @Override

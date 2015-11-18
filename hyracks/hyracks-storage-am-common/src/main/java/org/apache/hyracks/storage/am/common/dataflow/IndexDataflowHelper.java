@@ -116,7 +116,6 @@ public abstract class IndexDataflowHelper implements IIndexDataflowHelper {
             }
             lcManager.open(resourceName);
         }
-        System.out.println("opening the index with the file " + this.file.getFile().getAbsolutePath());
     }
 
     @Override

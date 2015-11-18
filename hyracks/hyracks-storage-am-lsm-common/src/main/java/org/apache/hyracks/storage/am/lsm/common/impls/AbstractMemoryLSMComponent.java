@@ -90,7 +90,7 @@ public abstract class AbstractMemoryLSMComponent extends AbstractLSMComponent {
             case REPLICATE:
             case SEARCH:
                 if (state == ComponentState.READABLE_WRITABLE || state == ComponentState.READABLE_UNWRITABLE
-                || state == ComponentState.READABLE_UNWRITABLE_FLUSHING) {
+                        || state == ComponentState.READABLE_UNWRITABLE_FLUSHING) {
                     readerCount++;
                 } else {
                     return false;

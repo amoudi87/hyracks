@@ -25,4 +25,6 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 
 public interface ITupleParserFactory extends Serializable {
     public ITupleParser createTupleParser(IHyracksTaskContext ctx) throws HyracksDataException;
+
+    public void setDataverse(String dataverse);
 }

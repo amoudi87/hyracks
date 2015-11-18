@@ -18,9 +18,13 @@
  */
 package org.apache.hyracks.storage.am.lsm.common.api;
 
+import java.util.HashSet;
+
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 
 public interface ILSMComponent {
+    
+    
 
     enum LSMComponentType {
         MEMORY,

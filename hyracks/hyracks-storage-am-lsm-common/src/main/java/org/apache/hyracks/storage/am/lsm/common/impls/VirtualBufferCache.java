@@ -21,6 +21,7 @@ package org.apache.hyracks.storage.am.lsm.common.impls;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -50,9 +51,23 @@ public class VirtualBufferCache implements IVirtualBufferCache {
 
     private boolean open;
 
+    private MultitenantVirtualBufferCache mtvbc;
+
+    public String toString() {
+        String pretty = "VBC: page size = " + pageSize + " and num of pages = " + numPages
+                + " and num of pages in the pages list = " + pages.size() + " and the pages are:\n";
+        for (VirtualPage page : pages) {
+            pretty += page.toString() + "\n";
+        }
+        return pretty;
+    }
+
     public VirtualBufferCache(ICacheMemoryAllocator allocator, int pageSize, int numPages) {
         this.allocator = allocator;
         this.fileMapManager = new TransientFileMapManager();
+        if (mtvbc != null) {
+            ((TransientFileMapManager) fileMapManager).setVbc(mtvbc);
+        }
         this.pageSize = pageSize;
         this.numPages = 2 * (numPages / 2) + 1;
 
@@ -293,6 +308,11 @@ public class VirtualBufferCache implements IVirtualBufferCache {
         return nextFree >= numPages;
     }
 
+    /**
+     * CacheBucket is a page with a lock
+     * 
+     * @author abdullahalamoudi
+     */
     private static class CacheBucket {
         private final ReentrantLock bucketLock;
         private VirtualPage cachedPage;
@@ -302,11 +322,15 @@ public class VirtualBufferCache implements IVirtualBufferCache {
         }
     }
 
+    public static final AtomicInteger counter = new AtomicInteger(0);
+
     private class VirtualPage implements ICachedPage {
         final ByteBuffer buffer;
         final ReadWriteLock latch;
         volatile long dpid;
         VirtualPage next;
+        VirtualBufferCache vbc = VirtualBufferCache.this;
+        public int id = counter.getAndIncrement();
 
         public String toString() {
             String pretty = "VirtualPage: id = " + dpid + " Next Page id = " + ((next == null) ? (-1) : next.dpid)
@@ -391,5 +415,22 @@ public class VirtualBufferCache implements IVirtualBufferCache {
     @Override
     public IIOReplicationManager getIOReplicationManager() {
         return null;
+    }
+
+    @Override
+    public int lookupFileId(FileReference fileRef) throws HyracksDataException {
+        return fileMapManager.lookupFileId(fileRef);
+    }
+
+    @Override
+    public FileReference lookupFileName(int fileId) throws HyracksDataException {
+        return fileMapManager.lookupFileName(fileId);
+    }
+
+    public void setmtvbc(MultitenantVirtualBufferCache multitenantVirtualBufferCache) {
+        this.mtvbc = multitenantVirtualBufferCache;
+        if (fileMapManager != null) {
+            ((TransientFileMapManager) fileMapManager).setVbc(mtvbc);
+        }
     }
 }
